@@ -1,60 +1,17 @@
-"use client";
 import Image from "next/image";
 import styles from "./page.module.css";
 
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import { Amplify } from "aws-amplify";
-import config from "../../amplifyconfiguration.json";
+import config from "@/amplifyconfiguration.json";
 import "@aws-amplify/ui-react/styles.css";
-import { useEffect, useState } from "react";
-import { Schema } from "../../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+import type { AppProps } from "next/app";
 
 Amplify.configure(config);
 
-const client = generateClient<Schema>();
-
-function Home() {
-  const [todos, setTodos] = useState<Schema["Todo"][]>([]);
-
-  async function listTodos() {
-    const { data } = await client.models.Todo.list();
-    setTodos(data);
-  }
-
-  useEffect(() => {
-    listTodos();
-
-    const sub = client.models.Todo.observeQuery().subscribe((data) => {
-      console.log(data);
-      setTodos([...data.items]);
-    });
-
-    return () => sub.unsubscribe();
-  }, []);
-
+export default function Home() {
   return (
     <main className={styles.main}>
-      <div>
-        <h1>Hello, Amplify 👋</h1>
-        <button
-          onClick={async () => {
-            const { errors, data: newTodo } = await client.models.Todo.create({
-              content: window.prompt("title"),
-              done: false,
-              priority: "medium",
-            });
-            console.log(errors, newTodo);
-          }}
-        >
-          Create
-        </button>
-        <ul>
-          {todos.map((todo) => (
-            <li key={todo.id}>{todo.content}</li>
-          ))}
-        </ul>
-      </div>
       <div className={styles.description}>
         <p>
           Get started by editing&nbsp;
@@ -144,5 +101,3 @@ function Home() {
     </main>
   );
 }
-
-export default withAuthenticator(Home);
